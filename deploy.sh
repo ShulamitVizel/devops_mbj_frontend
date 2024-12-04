@@ -1,7 +1,7 @@
 # #!/bin/bash
 
 # # Set variables
-# BUCKET_NAME="shulamit-vizel-bucket"
+# BUCKET_NAME="hadas-ben-haim-bucket"
 # BRANCH="main"  # Specify the branch name explicitly
 
 # # Log function for better output readability
@@ -41,8 +41,8 @@
 # fi
 
 # # Step 4: Upload the built files to the GCS bucket
-# log "Uploading files to GCS bucket ($shulamit-vizel-bucket)..."
-# if gsutil -m cp -r build/* gs://$shulamit-vizel-bucket; then
+# log "Uploading files to GCS bucket ($hadas-ben-haim-bucket)..."
+# if gsutil -m cp -r build/* gs://$hadas-ben-haim-bucket; then
 #     log "Files uploaded successfully to GCS bucket."
 # else
 #     log "Error: Failed to upload files to GCS bucket. Exiting."
@@ -105,8 +105,8 @@ else
 fi
 
 # Step 4: Upload the built files to the GCS bucket
-log "Uploading files to GCS bucket ($shulamit-vizel-bucket)..."
-if gsutil -m cp -r build/* gs://$shulamit-vizel-bucket; then
+log "Uploading files to GCS bucket ($hadas-ben-haim-bucket)..."
+if gsutil -m cp -r build/* gs://$hadas-ben-haim-bucket; then
     log "Files uploaded successfully to GCS bucket."
 else
     log "Error: Failed to upload files to GCS bucket. Exiting."
