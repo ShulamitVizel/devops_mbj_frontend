@@ -1,31 +1,116 @@
+# #!/bin/bash
+
+# # Set variables
+# BUCKET_NAME="shulamit-vizel-bucket"
+# BRANCH="main"  # Specify the branch name explicitly
+
+# # Log function for better output readability
+# log() {
+#     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+# }
+
+# # Step 1: Check for unstaged changes and commit them
+# log "Checking for unstaged changes..."
+# if [[ -n $(git status --porcelain) ]]; then
+#     log "Changes detected. Staging and committing..."
+#     git add .
+#     git commit -m "Automated commit for deployment"
+# else
+#     log "No changes detected. Skipping commit step."
+# fi
+
+# # Step 2: Push changes to GitHub
+# log "Pushing changes to GitHub..."
+# if git push origin $BRANCH; then
+#     log "Changes pushed successfully."
+# else
+#     log "Error: Failed to push changes. Exiting."
+#     exit 1
+# fi
+
+# # Step 3: Install dependencies and build the React app
+# log "Installing dependencies..."
+# npm install
+
+# log "Building React app..."
+# if npm run build; then
+#     log "React app built successfully."
+# else
+#     log "Error: React app build failed. Exiting."
+#     exit 1
+# fi
+
+# # Step 4: Upload the built files to the GCS bucket
+# log "Uploading files to GCS bucket ($shulamit-vizel-bucket)..."
+# if gsutil -m cp -r build/* gs://$shulamit-vizel-bucket; then
+#     log "Files uploaded successfully to GCS bucket."
+# else
+#     log "Error: Failed to upload files to GCS bucket. Exiting."
+#     exit 1
+# fi
+
+# log "Automation script completed successfully!"
+
+
 #!/bin/bash
 
+# Set variables
+BUCKET_NAME="shulamit-vizel-bucket"
+BRANCH="main"  # Specify the branch name explicitly
 
-handle_error() {
-  echo "❌ שגיאה: $1"
-  exit 1
+# Log function for better output readability
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
-echo "🔍 בודק שינויים בקוד..."
-if ! git diff-index --quiet HEAD; then
-  echo "📂 נמצאו שינויים. מבצע Commit..."
-  git add . || handle_error "נכשל בהוספת שינויים."
-  git commit -m "🚀 Automated commit" || handle_error "נכשל ביצירת Commit."
-  git push origin main || handle_error "נכשל בדחיפת שינויים ל-GitHub."
+# Step 1: Check for unstaged changes and commit them
+log "Checking for unstaged changes..."
+if [[ -n $(git status --porcelain) ]]; then
+    log "Changes detected. Staging changes..."
+    git add .
+    log "Enter a commit message:"
+    read -r COMMIT_MESSAGE
+    if [[ -z "$COMMIT_MESSAGE" ]]; then
+        log "Error: Commit message cannot be empty. Exiting."
+        exit 1
+    fi
+    git commit -m "$COMMIT_MESSAGE"
 else
-  echo "✅ אין שינויים לדחוף ל-GitHub."
+    log "No changes detected. Skipping commit step."
 fi
 
+# Step 2: Push changes to GitHub
+log "Pushing changes to GitHub..."
+if git push origin $BRANCH; then
+    log "Changes pushed successfully."
+else
+    log "Error: Failed to push changes. Exiting."
+    exit 1
+fi
 
-echo "⚙️ מתקין תלותים ובונה את האפליקציה..."
-npm install || handle_error "נכשל בהתקנת תלותים."
-npm run build || handle_error "נכשל בבניית האפליקציה."
+# Step 3: Install dependencies and build the React app
+log "Installing dependencies..."
+if [[ ! -d "node_modules" ]]; then
+    npm install
+else
+    log "Dependencies already installed. Skipping npm install."
+fi
 
-BUCKET_NAME="your-gcs-bucket-name"
-BUILD_DIR="build"
+log "Building React app..."
+if npm run build; then
+    log "React app built successfully."
+else
+    log "Error: React app build failed. Exiting."
+    exit 1
+fi
 
-echo "☁️ מעלה את קבצי ה-Build ל-GCS..."
-gcloud storage cp -r $BUILD_DIR/* gs://$BUCKET_NAME || handle_error "נכשל בהעלאת הקבצים ל-GCS."
+# Step 4: Upload the built files to the GCS bucket
+log "Uploading files to GCS bucket ($shulamit-vizel-bucket)..."
+if gsutil -m cp -r build/* gs://$shulamit-vizel-bucket; then
+    log "Files uploaded successfully to GCS bucket."
+else
+    log "Error: Failed to upload files to GCS bucket. Exiting."
+    exit 1
+fi
 
-
-echo "✅ הפריסה הושלמה בהצלחה!"
+log "Automation script completed successfully!"
